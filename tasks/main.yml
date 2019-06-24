@@ -1,2 +1,35 @@
 ---
 # Role tasks
+
+- block:
+    - name: Add changes
+      command: git add .
+      args:
+        chdir: "{{ git_commit_repo_dir }}"
+        warn: no
+      when: git_commit_add_changes | bool
+
+    - name: Commit to git repository
+      command: >-
+        git commit -m "{{ git_commit_message }}"
+      args:
+        chdir: "{{ git_commit_repo_dir }}"
+        warn: no
+
+    - name: Push changes to git repository
+      shell: >-
+        ssh-agent bash -c \
+        'ssh-add {{ git_commit_key_file }}; \
+        /usr/bin/git push \
+        {{ git_commit_push_repo }} \
+        {{ git_commit_push_branch }}'
+      args:
+        chdir: "{{ git_commit_repo_dir }}"
+        warn: no
+      when:
+        - git_commit_push_repo is defined
+        - git_commit_push_repo | length > 0
+        - git_commit_push_branch is defined
+        - git_commit_push_branch | length > 0
+  tags:
+    - role::git_commit

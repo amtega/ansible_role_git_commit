@@ -1,2 +1,26 @@
 ---
 # Role default lower priority variables
+
+# Directory containing the repository
+
+git_commit_repo_dir:
+
+# Commit message
+
+git_commit_message:
+
+# SSH key file to use for git operations
+
+# git_commit_key_file: ~/.ssh/id_rsa
+
+# Automatically add all files changed to commit
+
+git_commit_add_changes: yes
+
+# Repository where to push the commit. If not given commit will not be pushed
+
+#git_commit_push_repo:
+
+# Branch to push the commit. If not given commit will not be pushed
+
+#git_commit_push_branch:
