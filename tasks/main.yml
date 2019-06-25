@@ -18,10 +18,10 @@
 
     - name: Push changes to git repository
       shell: >-
-        ssh-agent bash -c \
-        'ssh-add {{ git_commit_key_file }}; \
-        /usr/bin/git push \
-        {{ git_commit_push_repo }} \
+        ssh-agent bash -c
+        'ssh-add {{ git_commit_key_file }};
+        /usr/bin/git push
+        {{ git_commit_push_repo }}
         {{ git_commit_push_branch }}'
       args:
         chdir: "{{ git_commit_repo_dir }}"
