@@ -11,25 +11,72 @@
 
     - name: Commit to git repository
       command: >-
-        git commit -m "{{ git_commit_message }}"
+        git {{ git_commit_opts }} commit -m "{{ git_commit_message }}"
       args:
         chdir: "{{ git_commit_repo_dir }}"
         warn: no
+      vars:
+        git_commit_username_opt: >-
+          {{ (git_commit_username is defined)
+             | ternary("-c " + "user.name=" + git_commit_username | default(""),
+                       "") }}
 
-    - name: Push changes to git repository
-      shell: >-
-        ssh-agent bash -c
-        'ssh-add {{ git_commit_key_file }};
-        /usr/bin/git push
-        {{ git_commit_push_repo }}
-        {{ git_commit_push_branch }}'
-      args:
-        chdir: "{{ git_commit_repo_dir }}"
-        warn: no
-      when:
-        - git_commit_push_repo is defined
-        - git_commit_push_repo | length > 0
-        - git_commit_push_branch is defined
-        - git_commit_push_branch | length > 0
+        git_commit_email_opt: >-
+          {{ (git_commit_email is defined)
+             | ternary("-c "
+                       + "user.email="
+                       + git_commit_email | default(""),
+                       "") }}
+
+        git_commit_opts: >-
+          {{ git_commit_username_opt }} {{ git_commit_email_opt }}
+
+    - block:
+        - name: Create temporary file for git ssh wrapper
+          tempfile:
+            state: file
+          register: git_commit_ssh_wrapper_tmp_result
+
+        - name: Setup git ssh wrapper
+          template:
+            dest: "{{ git_commit_ssh_wraper }}"
+            src: ssh_wrapper.sh.j2
+            mode: "0750"
+      when: git_commit_key_file is defined
+
+    - block:
+        - name: Push changes to git repository
+          shell: >-
+            git push
+            {{ git_commit_push_repo }}
+            {{ git_commit_push_branch }}
+          args:
+            chdir: "{{ git_commit_repo_dir }}"
+            warn: no
+          when:
+            - git_commit_push_repo is defined
+            - git_commit_push_repo | length > 0
+            - git_commit_push_branch is defined
+            - git_commit_push_branch | length > 0
+
+        - name: Push changes to origin/master
+          shell: git --no-pager push origin master
+          args:
+            chdir: "{{ git_commit_repo_dir }}"
+          register: git_commit_push_origin_master_result
+          changed_when: >-
+            git_commit_push_origin_master_result.stderr is search("master -> master")
+          when: git_commit_push_origin_master | bool
+      environment:
+        LANGUAGE: en_US
+        GIT_SSH: "{{ git_commit_ssh_wraper }}"
+
+    - name: Remove temporary file for git ssh wrapper
+      file:
+        path: "{{ git_commit_ssh_wraper }}"
+        state: absent
+      when: git_commit_key_file is defined
+  vars:
+    git_commit_ssh_wraper: "{{ git_commit_ssh_wrapper_tmp_result.path }}"
   tags:
     - role::git_commit

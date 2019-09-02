@@ -24,3 +24,12 @@ git_commit_add_changes: yes
 # Branch to push the commit. If not given commit will not be pushed
 
 #git_commit_push_branch:
+
+# Username and email to use for the commit
+
+# git_commit_username:
+# git_commit_email:
+
+# Push origin/master. Usefull if your origin/master was pulled or changed.
+
+git_commit_push_origin_master: no
