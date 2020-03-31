@@ -1,7 +1,7 @@
 ---
 # Tasks for testing role
 
-- name: Run idempotence test
+- name: Setup testing sandbox
   hosts: localhost
   roles:
     - role: amtega.docker_presets
@@ -51,7 +51,7 @@
         git_commit_message: Ansible git_commit role test.
         git_commit_add_changes: yes
 
-- name: Cleanup docker docker sandbox
+- name: Cleanup testing sandbox
   hosts: localhost
   roles:
     - role: amtega.docker_sandbox
