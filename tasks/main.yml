@@ -1,22 +1,6 @@
 ---
 # Role tasks
 
-- include_role:
-    name: amtega.check_platform
-  vars:
-    check_platform_distributions:
-      centos: 7
-      fedora: 29
-      rhel: 7
-
-- include_role:
-    name: amtega.packages
-  vars:
-    packages_os:
-      all:
-        all:
-          git: present
-
 - block:
     - name: Add changes
       command: git add .
@@ -81,7 +65,8 @@
             chdir: "{{ git_commit_repo_dir }}"
           register: git_commit_push_origin_master_result
           changed_when: >-
-            git_commit_push_origin_master_result.stderr is search("master -> master")
+            git_commit_push_origin_master_result.stderr
+            is search("master -> master")
           when: git_commit_push_origin_master | bool
       environment:
         LANGUAGE: en_US
