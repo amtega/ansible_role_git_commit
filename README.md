@@ -4,7 +4,9 @@ This is an [Ansible](http://www.ansible.com) role to commit changes in a git rep
 
 ## Role Variables
 
-A list of all the default variables for this role is available in `defaults/main.yml`.
+A list of all the default variables for this role is available in `defaults/main.yml`. The role setup the following facts:
+
+- `git_commit_result`: result of the git commit
 
 ## Example Playbook
 
