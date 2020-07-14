@@ -1,0 +1,25 @@
+---
+
+- name: Prepare
+  hosts: molecule_hosts
+  gather_facts: no
+  roles:
+    - amtega.git_clone
+  tasks:
+    - name: Create testing file
+      copy:
+        content: Hello World
+        dest: /tmp/git_commit/testing_file
+
+    - name: Configure git for testing
+      git_config:
+        scope: global
+        name: "{{ item.name }}"
+        value: "{{ item.value }}"
+      loop:
+        - name: user.email
+          value: user@acme.com
+        - name: user.name
+          value: Testing user
+      loop_control:
+        label: "{{ item.name }}"
