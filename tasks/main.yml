@@ -3,7 +3,7 @@
 
 - block:
     - name: Add changes
-      command: git add .
+      command: git add --all .
       args:
         chdir: "{{ git_commit_repo_dir }}"
         warn: no
