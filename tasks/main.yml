@@ -7,6 +7,7 @@
       args:
         chdir: "{{ git_commit_repo_dir }}"
         warn: no
+      changed_when: no
       when: git_commit_add_changes | bool
 
     - name: Commit to git repository
