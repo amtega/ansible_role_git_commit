@@ -10,6 +10,7 @@
       copy:
         content: Hello World
         dest: /tmp/git_commit/testing_file
+        mode: 0640
 
     - name: Configure git for testing
       git_config:
