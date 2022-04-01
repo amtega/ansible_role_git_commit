@@ -10,9 +10,25 @@
       changed_when: no
       when: git_commit_add_changes | bool
 
+    - name: Create commit message temporary file
+      # To circumvent 255 char commit message limitation
+      ansible.builtin.tempfile:
+        state: file
+        suffix: temp
+      changed_when: no  # Temporal files don't alter the state
+      register: commit_message_tempfile_result
+
+    - name: Add commit message content to temporary file
+      ansible.builtin.copy:
+        content: "{{ git_commit_message }}"
+        dest: "{{ commit_message_tempfile_result.path }}"
+        mode: u=rw,g=r,o=r
+      changed_when: no
+
     - name: Commit to git repository
       command: >-
-        git {{ git_commit_opts }} commit -m "{{ git_commit_message }}"
+        git {{ git_commit_opts }} commit -F "{{
+          commit_message_tempfile_result.path }}"
       args:
         chdir: "{{ git_commit_repo_dir }}"
         warn: no
@@ -39,6 +55,13 @@
 
       environment:
         LANGUAGE: en_US
+
+    - name: Remove commit message temporary file
+      ansible.builtin.file:
+        path: "{{ commit_message_tempfile_result.path }}"
+        state: absent
+      when: commit_message_tempfile_result.path is defined
+      changed_when: no
 
     - name: Setup fact indicating commit result
       set_fact:
