@@ -1,9 +1,9 @@
 ---
-# Role tasks
 
-- block:
+- name: Git commit
+  block:
     - name: Add changes
-      command: git add --all .
+      ansible.builtin.command: git add --all .
       args:
         chdir: "{{ git_commit_repo_dir }}"
         warn: no
@@ -26,7 +26,7 @@
       changed_when: no
 
     - name: Commit to git repository
-      command: >-
+      ansible.builtin.command: >-
         git {{ git_commit_opts }} commit -F "{{
           commit_message_tempfile_result.path }}"
       args:
@@ -64,27 +64,30 @@
       changed_when: no
 
     - name: Setup fact indicating commit result
-      set_fact:
+      ansible.builtin.set_fact:
         git_commit_result: "{{ git_commit_command_result }}"
 
-    - when: git_commit_result is changed
+    - name: Push changes
+      when: git_commit_result is changed
       block:
-        - block:
+        - name: Manage git ssh wrapper
+          block:
             - name: Create temporary file for git ssh wrapper
-              tempfile:
+              ansible.builtin.tempfile:
                 state: file
               register: git_commit_ssh_wrapper_tmp_result
 
             - name: Setup git ssh wrapper
-              template:
+              ansible.builtin.template:
                 dest: "{{ git_commit_ssh_wraper }}"
                 src: ssh_wrapper.sh.j2
                 mode: "0750"
           when: git_commit_key_file is defined
 
-        - block:
+        - name: Perform git push
+          block:
             - name: Push changes to git repository
-              shell: >-
+              ansible.builtin.command: >-
                 git push
                 {{ git_commit_push_repo }}
                 {{ git_commit_push_branch }}
@@ -98,9 +101,10 @@
                 - git_commit_push_branch | length > 0
 
             - name: Push changes to origin/master
-              shell: git --no-pager push origin master
+              ansible.builtin.command: git --no-pager push origin master
               args:
                 chdir: "{{ git_commit_repo_dir }}"
+                warn: no
               register: git_commit_push_origin_master_result
               changed_when: >-
                 git_commit_push_origin_master_result.stderr
@@ -111,7 +115,7 @@
             GIT_SSH: "{{ git_commit_ssh_wraper }}"
 
         - name: Remove temporary file for git ssh wrapper
-          file:
+          ansible.builtin.file:
             path: "{{ git_commit_ssh_wraper }}"
             state: absent
           when: git_commit_key_file is defined
