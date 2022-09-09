@@ -7,7 +7,7 @@
     - amtega.git_clone
   tasks:
     - name: Create testing file
-      copy:
+      ansible.builtin.copy:
         content: Hello World
         dest: /tmp/git_commit/testing_file
         mode: 0640
